@@ -22,7 +22,6 @@ public class PhoneAlertService {
 
     public List<String> getPhonesByStation(int stationNumber) throws Exception {
 
-        // 1. Récupérer les adresses couvertes par la caserne
         List<String> addresses = new ArrayList<>();
         for (Firestation f : firestationRepo.getAllFirestations()) {
             if (f.getStation() == stationNumber) {
@@ -30,7 +29,6 @@ public class PhoneAlertService {
             }
         }
 
-        // 2. Récupérer les numéros de téléphone des personnes vivant à ces adresses
         List<String> phones = new ArrayList<>();
         for (Person p : personRepo.getAllPersons()) {
             if (addresses.contains(p.getAddress())) {

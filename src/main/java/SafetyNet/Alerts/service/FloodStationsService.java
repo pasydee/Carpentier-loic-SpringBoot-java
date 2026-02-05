@@ -31,7 +31,6 @@ public class FloodStationsService {
 
     public FloodStationsResponse getFloodInfo(List<Integer> stationNumbers) throws Exception {
 
-        // 1. Récupérer toutes les adresses couvertes par les stations
         Set<String> addresses = new HashSet<>();
         for (Firestation f : firestationRepo.getAllFirestations()) {
             if (stationNumbers.contains(f.getStation())) {
@@ -39,11 +38,9 @@ public class FloodStationsService {
             }
         }
 
-        // 2. Récupérer toutes les personnes
         List<Person> persons = personRepo.getAllPersons();
         List<MedicalRecord> medicalRecords = medicalRepo.getAllMedicalRecords();
 
-        // 3. Regrouper par adresse
         List<FloodStationsResponse.AddressInfo> households = new ArrayList<>();
 
         for (String address : addresses) {
@@ -56,7 +53,6 @@ public class FloodStationsService {
             for (Person p : persons) {
                 if (!p.getAddress().equals(address)) continue;
 
-                // Trouver le dossier médical
                 MedicalRecord record = null;
                 for (MedicalRecord m : medicalRecords) {
                     if (m.getFirstName().equals(p.getFirstName()) &&

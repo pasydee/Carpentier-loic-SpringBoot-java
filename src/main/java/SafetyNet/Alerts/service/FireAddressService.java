@@ -32,7 +32,6 @@ public class FireAddressService {
 
     public FireAddressResponse getFireInfo(String address) throws Exception {
 
-        // 1. Trouver la caserne qui couvre l'adresse
         int stationNumber = 0;
         for (Firestation f : firestationRepo.getAllFirestations()) {
             if (f.getAddress().equals(address)) {
@@ -41,7 +40,6 @@ public class FireAddressService {
             }
         }
 
-        // 2. Récupérer les habitants de l'adresse
         List<Person> persons = new ArrayList<>();
         for (Person p : personRepo.getAllPersons()) {
             if (p.getAddress().equals(address)) {
@@ -49,14 +47,12 @@ public class FireAddressService {
             }
         }
 
-        // 3. Récupérer les dossiers médicaux
         List<MedicalRecord> medicalRecords = medicalRepo.getAllMedicalRecords();
 
         List<FireAddressResponse.ResidentInfo> residents = new ArrayList<>();
 
         for (Person p : persons) {
 
-            // Trouver le dossier médical
             MedicalRecord record = null;
             for (MedicalRecord m : medicalRecords) {
                 if (m.getFirstName().equals(p.getFirstName()) &&
@@ -68,7 +64,6 @@ public class FireAddressService {
 
             if (record == null) continue;
 
-            // Construire l'objet ResidentInfo
             FireAddressResponse.ResidentInfo info = new FireAddressResponse.ResidentInfo();
             info.setFirstName(p.getFirstName());
             info.setLastName(p.getLastName());
@@ -80,7 +75,6 @@ public class FireAddressService {
             residents.add(info);
         }
 
-        // 4. Construire la réponse finale
         FireAddressResponse response = new FireAddressResponse();
         response.setStationNumber(stationNumber);
         response.setResidents(residents);
