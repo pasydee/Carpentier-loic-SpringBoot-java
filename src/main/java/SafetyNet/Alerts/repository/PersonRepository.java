@@ -11,8 +11,14 @@ import java.util.List;
 @Repository
 public class PersonRepository {
 
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final   File dataFile = new File("src/main/resources/data.json");
+    private ObjectMapper mapper = new ObjectMapper();
+    private File dataFile = new File("src/main/resources/data.json");
+
+    public PersonRepository(String path){
+        this.dataFile = new File(path);
+        this.mapper = new ObjectMapper();
+    }
+
 
     public List<Person> getAllPersons() throws Exception{
         DataWrapper wrapper = mapper.readValue(dataFile,DataWrapper.class);
