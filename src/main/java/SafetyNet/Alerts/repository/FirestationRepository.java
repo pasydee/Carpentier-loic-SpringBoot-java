@@ -12,18 +12,24 @@ import java.util.List;
 @Repository
 public class FirestationRepository {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
     private File dataFile = new File("src/main/resources/data.json");
 
+    // ✔️ Constructeur utilisé par Spring (obligatoire)
+    public FirestationRepository() {}
+
+    // ✔️ Constructeur utilisé uniquement pour les tests
     public FirestationRepository(String path) {
         this.dataFile = new File(path);
-        this.mapper = new ObjectMapper();
     }
-
 
     public List<Firestation> getAllFirestations() throws Exception {
         DataWrapper wrapper = mapper.readValue(dataFile, DataWrapper.class);
-        return wrapper.getFirestations() !=null ? new ArrayList<>(wrapper.getFirestations()) : new ArrayList<>();
+
+        // ✔️ Toujours retourner une liste modifiable
+        return wrapper.getFirestations() != null
+                ? new ArrayList<>(wrapper.getFirestations())
+                : new ArrayList<>();
     }
 
     public void saveAllFirestations(List<Firestation> firestations) throws Exception {

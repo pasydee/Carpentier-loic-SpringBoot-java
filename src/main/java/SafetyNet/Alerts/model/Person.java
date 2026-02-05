@@ -1,8 +1,14 @@
 package SafetyNet.Alerts.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Person {
 
     private String firstName;
