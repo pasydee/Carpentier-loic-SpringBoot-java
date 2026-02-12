@@ -48,7 +48,7 @@ public class FirestationController {
             log.info("Firestation mapping successfully updated for address: {}", address);
             return ResponseEntity.ok(result);
         } else {
-            log.error("Firestation mapping not found for update: {} (station {})", address, station);
+            log.info("Firestation mapping not found for update: {} (station {})", address, station);
             return ResponseEntity.notFound().build();
         }
     }
@@ -68,7 +68,7 @@ public class FirestationController {
                     address, station);
             return ResponseEntity.ok().build();
         } else {
-            log.error("Firestation mapping not found for deletion (address={} station={})",
+            log.info("Firestation mapping not found for deletion (address={} station={})",
                     address, station);
             return ResponseEntity.notFound().build();
         }

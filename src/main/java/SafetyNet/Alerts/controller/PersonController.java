@@ -43,7 +43,7 @@ public class PersonController {
             log.info("Person successfully updated: {} {}", firstName, lastName);
             return ResponseEntity.ok(result);
         } else {
-            log.error("Person not found for update: {} {}", firstName, lastName);
+            log.info("Person not found for update: {} {}", firstName, lastName);
             return ResponseEntity.notFound().build();
         }
     }
@@ -60,7 +60,7 @@ public class PersonController {
             log.info("Person successfully deleted: {} {}", firstName, lastName);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            log.error("Error deleting person {} {}: {}", firstName, lastName, e.getMessage());
+            log.info("Error deleting person {} {}: {}", firstName, lastName, e.getMessage());
             throw e;
         }
     }
