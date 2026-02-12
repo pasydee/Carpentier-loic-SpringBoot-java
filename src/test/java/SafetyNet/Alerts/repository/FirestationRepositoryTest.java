@@ -1,6 +1,8 @@
 package SafetyNet.Alerts.repository;
 
 import SafetyNet.Alerts.model.Firestation;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -9,11 +11,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FirestationRepositoryTest {
 
+    private  FirestationRepository repo;
+    private List<Firestation> firestations;
+
+    @BeforeEach
+    void setup()throws Exception{
+        repo = new FirestationRepository("src/test/resources/data-test.json");
+        firestations = repo.getAllFirestations();
+    }
+
     @Test
     void testReadJson() throws Exception {
-        FirestationRepository repo = new FirestationRepository("src/test/resources/data-test.json");
-
-        List<Firestation> firestations = repo.getAllFirestations();
 
         assertNotNull(firestations);
         assertFalse(firestations.isEmpty());
@@ -22,9 +30,6 @@ class FirestationRepositoryTest {
 
     @Test
     void testWriteJson() throws Exception {
-        FirestationRepository repo = new FirestationRepository("src/test/resources/data-test.json");
-
-        List<Firestation> firestations = repo.getAllFirestations();
         int sizeBefore = firestations.size();
 
         Firestation f = new Firestation();

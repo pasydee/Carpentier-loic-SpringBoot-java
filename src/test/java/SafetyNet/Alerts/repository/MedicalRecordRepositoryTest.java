@@ -1,6 +1,7 @@
 package SafetyNet.Alerts.repository;
 
 import SafetyNet.Alerts.model.MedicalRecord;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -9,11 +10,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MedicalRecordRepositoryTest {
 
+    private MedicalRecordRepository repo;
+    private List<MedicalRecord> records;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        repo = new MedicalRecordRepository("src/test/resources/data-test.json");
+        records = repo.getAllMedicalRecords();
+    }
+
     @Test
     void testReadJson() throws Exception {
-        MedicalRecordRepository repo = new MedicalRecordRepository("src/test/resources/data-test.json");
 
-        List<MedicalRecord> records = repo.getAllMedicalRecords();
 
         assertNotNull(records);
         assertFalse(records.isEmpty());
@@ -22,9 +30,7 @@ class MedicalRecordRepositoryTest {
 
     @Test
     void testWriteJson() throws Exception {
-        MedicalRecordRepository repo = new MedicalRecordRepository("src/test/resources/data-test.json");
 
-        List<MedicalRecord> records = repo.getAllMedicalRecords();
         int sizeBefore = records.size();
 
         MedicalRecord m = new MedicalRecord();

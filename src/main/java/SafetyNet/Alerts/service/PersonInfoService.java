@@ -5,6 +5,7 @@ import SafetyNet.Alerts.model.MedicalRecord;
 import SafetyNet.Alerts.model.Person;
 import SafetyNet.Alerts.repository.MedicalRecordRepository;
 import SafetyNet.Alerts.repository.PersonRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class PersonInfoService {
 
     private final PersonRepository personRepo;
@@ -26,15 +28,21 @@ public class PersonInfoService {
 
     public List<PersonInfoResponse> getPersonInfo(String lastName) throws Exception {
 
+        log.info("Fetching person info for lastName={}", lastName);
+
         List<Person> persons = personRepo.getAllPersons();
         List<MedicalRecord> medicalRecords = medicalRepo.getAllMedicalRecords();
+
+        log.debug("Total persons loaded: {}", persons.size());
+        log.debug("Total medical records loaded: {}", medicalRecords.size());
 
         List<PersonInfoResponse> result = new ArrayList<>();
 
         for (Person p : persons) {
             if (!p.getLastName().equalsIgnoreCase(lastName)) continue;
 
-            // Trouver le dossier médical
+            log.debug("Matching person found: {} {}", p.getFirstName(), p.getLastName());
+
             MedicalRecord record = null;
             for (MedicalRecord m : medicalRecords) {
                 if (m.getFirstName().equals(p.getFirstName()) &&
@@ -44,7 +52,10 @@ public class PersonInfoService {
                 }
             }
 
-            if (record == null) continue;
+            if (record == null) {
+                log.debug("No medical record found for {} {}", p.getFirstName(), p.getLastName());
+                continue;
+            }
 
             PersonInfoResponse info = new PersonInfoResponse();
             info.setFirstName(p.getFirstName());
@@ -56,7 +67,13 @@ public class PersonInfoService {
             info.setAllergies(record.getAllergies());
 
             result.add(info);
+
+            log.debug("PersonInfo added: {} {} (age {})",
+                    p.getFirstName(), p.getLastName(), info.getAge());
         }
+
+        log.info("PersonInfo response generated for lastName {}: {} persons found",
+                lastName, result.size());
 
         return result;
     }

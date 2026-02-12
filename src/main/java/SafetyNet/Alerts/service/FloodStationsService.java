@@ -7,6 +7,7 @@ import SafetyNet.Alerts.model.Person;
 import SafetyNet.Alerts.repository.FirestationRepository;
 import SafetyNet.Alerts.repository.MedicalRecordRepository;
 import SafetyNet.Alerts.repository.PersonRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
+@Slf4j
 public class FloodStationsService {
 
     private final FirestationRepository firestationRepo;
@@ -31,19 +33,27 @@ public class FloodStationsService {
 
     public FloodStationsResponse getFloodInfo(List<Integer> stationNumbers) throws Exception {
 
+        log.info("Fetching flood information for stations: {}", stationNumbers);
+
         Set<String> addresses = new HashSet<>();
         for (Firestation f : firestationRepo.getAllFirestations()) {
             if (stationNumbers.contains(f.getStation())) {
                 addresses.add(f.getAddress());
+                log.debug("Address covered by station {}: {}", f.getStation(), f.getAddress());
             }
         }
 
         List<Person> persons = personRepo.getAllPersons();
         List<MedicalRecord> medicalRecords = medicalRepo.getAllMedicalRecords();
 
+        log.debug("Total persons loaded: {}", persons.size());
+        log.debug("Total medical records loaded: {}", medicalRecords.size());
+
         List<FloodStationsResponse.AddressInfo> households = new ArrayList<>();
 
         for (String address : addresses) {
+
+            log.debug("Processing address: {}", address);
 
             FloodStationsResponse.AddressInfo addressInfo = new FloodStationsResponse.AddressInfo();
             addressInfo.setAddress(address);
@@ -52,6 +62,8 @@ public class FloodStationsService {
 
             for (Person p : persons) {
                 if (!p.getAddress().equals(address)) continue;
+
+                log.debug("Resident found at {}: {} {}", address, p.getFirstName(), p.getLastName());
 
                 MedicalRecord record = null;
                 for (MedicalRecord m : medicalRecords) {
@@ -62,7 +74,10 @@ public class FloodStationsService {
                     }
                 }
 
-                if (record == null) continue;
+                if (record == null) {
+                    log.debug("No medical record found for {} {}", p.getFirstName(), p.getLastName());
+                    continue;
+                }
 
                 FloodStationsResponse.ResidentInfo info = new FloodStationsResponse.ResidentInfo();
                 info.setFirstName(p.getFirstName());
@@ -73,14 +88,21 @@ public class FloodStationsService {
                 info.setAllergies(record.getAllergies());
 
                 residents.add(info);
+
+                log.debug("Resident added: {} {} (age {})",
+                        p.getFirstName(), p.getLastName(), info.getAge());
             }
 
             addressInfo.setResidents(residents);
             households.add(addressInfo);
+
+            log.debug("Completed address {}: {} residents", address, residents.size());
         }
 
         FloodStationsResponse response = new FloodStationsResponse();
         response.setHouseholds(households);
+
+        log.info("FloodStations response generated: {} households", households.size());
 
         return response;
     }

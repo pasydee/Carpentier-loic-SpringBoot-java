@@ -7,6 +7,7 @@ import SafetyNet.Alerts.model.Person;
 import SafetyNet.Alerts.repository.FirestationRepository;
 import SafetyNet.Alerts.repository.MedicalRecordRepository;
 import SafetyNet.Alerts.repository.PersonRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class FireAddressService {
 
     private final FirestationRepository firestationRepo;
@@ -32,10 +34,13 @@ public class FireAddressService {
 
     public FireAddressResponse getFireInfo(String address) throws Exception {
 
+        log.info("Fetching fire address information for address: {}", address);
+
         int stationNumber = 0;
         for (Firestation f : firestationRepo.getAllFirestations()) {
             if (f.getAddress().equals(address)) {
                 stationNumber = f.getStation();
+                log.debug("Firestation found for address {}: station {}", address, stationNumber);
                 break;
             }
         }
@@ -44,10 +49,12 @@ public class FireAddressService {
         for (Person p : personRepo.getAllPersons()) {
             if (p.getAddress().equals(address)) {
                 persons.add(p);
+                log.debug("Person found at address {}: {} {}", address, p.getFirstName(), p.getLastName());
             }
         }
 
         List<MedicalRecord> medicalRecords = medicalRepo.getAllMedicalRecords();
+        log.debug("Total medical records loaded: {}", medicalRecords.size());
 
         List<FireAddressResponse.ResidentInfo> residents = new ArrayList<>();
 
@@ -62,7 +69,10 @@ public class FireAddressService {
                 }
             }
 
-            if (record == null) continue;
+            if (record == null) {
+                log.debug("No medical record found for {} {}", p.getFirstName(), p.getLastName());
+                continue;
+            }
 
             FireAddressResponse.ResidentInfo info = new FireAddressResponse.ResidentInfo();
             info.setFirstName(p.getFirstName());
@@ -73,11 +83,17 @@ public class FireAddressService {
             info.setAllergies(record.getAllergies());
 
             residents.add(info);
+
+            log.debug("Resident added: {} {} (age {})",
+                    p.getFirstName(), p.getLastName(), info.getAge());
         }
 
         FireAddressResponse response = new FireAddressResponse();
         response.setStationNumber(stationNumber);
         response.setResidents(residents);
+
+        log.info("FireAddress response generated for {}: station={}, residents={}",
+                address, stationNumber, residents.size());
 
         return response;
     }

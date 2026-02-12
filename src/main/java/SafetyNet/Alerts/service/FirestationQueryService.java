@@ -7,6 +7,7 @@ import SafetyNet.Alerts.model.Person;
 import SafetyNet.Alerts.repository.FirestationRepository;
 import SafetyNet.Alerts.repository.MedicalRecordRepository;
 import SafetyNet.Alerts.repository.PersonRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class FirestationQueryService {
 
     private final FirestationRepository firestationRepo;
@@ -32,34 +34,35 @@ public class FirestationQueryService {
 
     public FirestationPersonsResponse getPersonsByStation(int stationNumber) throws Exception {
 
-        // 1. Récupérer les adresses couvertes par la station
+        log.info("Fetching persons covered by firestation {}", stationNumber);
+
         List<String> addresses = new ArrayList<>();
         for (Firestation f : firestationRepo.getAllFirestations()) {
             if (f.getStation() == stationNumber) {
                 addresses.add(f.getAddress());
+                log.debug("Address covered by station {}: {}", stationNumber, f.getAddress());
             }
         }
 
-        // 2. Récupérer les personnes habitant ces adresses
         List<Person> persons = new ArrayList<>();
         for (Person p : personRepo.getAllPersons()) {
             if (addresses.contains(p.getAddress())) {
                 persons.add(p);
+                log.debug("Person found at covered address: {} {} ({})",
+                        p.getFirstName(), p.getLastName(), p.getAddress());
             }
         }
 
-        // 3. Récupérer les dossiers médicaux
         List<MedicalRecord> medicalRecords = medicalRepo.getAllMedicalRecords();
+        log.debug("Total medical records loaded: {}", medicalRecords.size());
 
         int adultCount = 0;
         int childCount = 0;
 
         List<FirestationPersonsResponse.PersonInfo> resultPersons = new ArrayList<>();
 
-        // 4. Construire la réponse
         for (Person p : persons) {
 
-            // Trouver le dossier médical correspondant
             MedicalRecord record = null;
             for (MedicalRecord m : medicalRecords) {
                 if (m.getFirstName().equals(p.getFirstName()) &&
@@ -69,14 +72,16 @@ public class FirestationQueryService {
                 }
             }
 
-            // Calcul de l'âge
             if (record != null) {
                 int age = calculateAge(record.getBirthdate());
+                log.debug("Age calculated for {} {}: {}", p.getFirstName(), p.getLastName(), age);
+
                 if (age <= 18) childCount++;
                 else adultCount++;
+            } else {
+                log.debug("No medical record found for {} {}", p.getFirstName(), p.getLastName());
             }
 
-            // Ajouter la personne dans la réponse
             FirestationPersonsResponse.PersonInfo info = new FirestationPersonsResponse.PersonInfo();
             info.setFirstName(p.getFirstName());
             info.setLastName(p.getLastName());
@@ -90,6 +95,9 @@ public class FirestationQueryService {
         response.setPersons(resultPersons);
         response.setAdultCount(adultCount);
         response.setChildCount(childCount);
+
+        log.info("Firestation query result for station {}: {} adults, {} children, {} persons total",
+                stationNumber, adultCount, childCount, resultPersons.size());
 
         return response;
     }
