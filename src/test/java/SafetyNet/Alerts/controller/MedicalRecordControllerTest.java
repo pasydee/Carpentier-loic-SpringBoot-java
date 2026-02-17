@@ -68,12 +68,14 @@ class MedicalRecordControllerTest {
                     """))
                 .andExpect(status().isOk());
     }
-
     @Test
     void testDeleteMedicalRecord() throws Exception {
         when(service.deleteMedicalRecord(eq("John"), eq("Boyd"))).thenReturn(true);
 
-        mockMvc.perform(delete("/medicalRecord?firstName=John&lastName=Boyd"))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/medicalRecord")
+                        .param("firstName", "John")
+                        .param("lastName", "Boyd"))
+                .andExpect(status().isNoContent()); // <-- 204 attendu
     }
+
 }

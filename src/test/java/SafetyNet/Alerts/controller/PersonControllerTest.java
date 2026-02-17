@@ -50,4 +50,14 @@ class PersonControllerTest {
                         .content("{\"address\":\"New Street\"}"))
                 .andExpect(status().isOk());
     }
+    @Test
+    void testDeletePerson() throws Exception {
+        when(service.deletePerson(eq("John"), eq("Boyd"))).thenReturn(true);
+
+        mockMvc.perform(delete("/person")
+                        .param("firstName", "John")
+                        .param("lastName", "Boyd"))
+                .andExpect(status().isNoContent());
+    }
+
 }
