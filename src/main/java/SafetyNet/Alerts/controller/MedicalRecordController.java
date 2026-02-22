@@ -2,6 +2,7 @@ package SafetyNet.Alerts.controller;
 
 import SafetyNet.Alerts.model.MedicalRecord;
 import SafetyNet.Alerts.service.MedicalRecordService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class MedicalRecordController {
     }
 
     @PostMapping
-    public ResponseEntity<MedicalRecord> addMedicalRecord(@RequestBody MedicalRecord record) throws Exception {
+    public ResponseEntity<MedicalRecord> addMedicalRecord(@Valid @RequestBody MedicalRecord record) throws Exception {
         log.info("POST /medicalRecord - Request to add medicalRecord: {} {}",record.getFirstName(),record.getLastName());
         log.debug("Payload received : {}",record);
 

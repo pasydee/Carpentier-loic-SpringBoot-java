@@ -2,6 +2,7 @@ package SafetyNet.Alerts.controller;
 
 import SafetyNet.Alerts.model.Person;
 import SafetyNet.Alerts.service.PersonService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class PersonController {
     }
 
     @PostMapping
-    public ResponseEntity<Person> addPerson(@RequestBody Person person) throws Exception {
+    public ResponseEntity<Person> addPerson(@Valid @RequestBody Person person) throws Exception {
         log.info("POST /person - Request to add person: {} {}", person.getFirstName(), person.getLastName());
         log.debug("Payload received: {}", person);
 
@@ -32,7 +33,7 @@ public class PersonController {
     public ResponseEntity<Person> updatePerson(
             @RequestParam String firstName,
             @RequestParam String lastName,
-            @RequestBody Person updated) throws Exception {
+            @Valid @RequestBody Person updated) throws Exception {
 
         log.info("PUT /person - Request to update person: {} {}", firstName, lastName);
         log.debug("Update payload: {}", updated);
